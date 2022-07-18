@@ -9,6 +9,10 @@ const todoSchema = new mongoose.Schema({
     description: {
         type: String,
         require: true
+    },
+    email: {
+        type: String,
+        require: true
     }
 }, {timestamps: true})
 

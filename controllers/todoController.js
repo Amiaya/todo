@@ -1,5 +1,5 @@
 const Todo = require('../models/todo')
-
+const sendEmail = require('../utils/email')
 
 exports.getAll = async (req, res) => {
     try {
@@ -12,9 +12,9 @@ exports.getAll = async (req, res) => {
         })
         
     } catch (err) {
+        console.log(err)
         res.status(400).json({
             status: "failed",
-            message: err
         })
         
     }
@@ -23,16 +23,24 @@ exports.getAll = async (req, res) => {
 exports.createTodo = async (req,res) => {
     try {
         const todo = await Todo.create(req.body)
+        const URL = `${req.protocol}://${req.get('host')}/todo/${todo._id}`
+        const message = `Your TODO list have be created, to confirm click on this link: ${URL}`
+        await sendEmail({
+            email: req.body.email,
+            subject: 'Check if the todo list was created',
+            message
+        })
         res.status(200).json({
             status: "successful",
             data: {
                 todo
-            }
+            },
+            message: 'Check your email to confirm that the list have been created'
         })
     } catch (err) {
+        console.log(err)
         res.status(400).json({
             status: "failed",
-            message: err
         })
         
     }
@@ -52,22 +60,23 @@ exports.updateTodo = async(req, res) => {
         })
         
     } catch (err) {
+        console.log(err)
         res.status(400).json({
             status: "failed",
-            message: err
         })
     }
 }
 
 exports.deleteTodo = async(req, res) => {
     try {
+        const todo = await Todo.findByIdAndDelete(req.params.id)
         res.status(204).json()
     } catch (err) {
+        console.log(err)
         res.status(400).json({
-            status: "failed",
-            message: err
+            status: "failed"
         })
     }
-    const todo = await Todo.findByIdAndDelete(req.params.id)
+  
 
 }
